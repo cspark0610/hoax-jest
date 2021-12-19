@@ -1,0 +1,53 @@
+{
+	"name": "hoaxify",
+	"version": "1.0.0",
+	"description": "tdd with express",
+	"main": "app.js",
+	"scripts": {
+		"start": "nodemon app.js",
+		"jest": "jest --watch",
+		"lint": "eslint . --fix",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "carlos s. park",
+	"license": "ISC",
+	"dependencies": {
+		"express": "^4.17.2"
+	},
+	"devDependencies": {
+		"eslint": "^8.5.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"jest": "^27.4.5",
+		"nodemon": "^2.0.15",
+		"prettier": "^2.5.1",
+		"supertest": "^6.1.6"
+	},
+	"eslintConfig": {
+		"parserOptions": {
+			"ecmaVersion": 6
+		},
+		"extends": [
+			"eslint:recommended",
+			"plugin:prettier/recommended"
+		],
+		"plugins": [
+			"prettier"
+		],
+		"env": {
+			"node": true,
+			"es6": true,
+			"jest": true
+		},
+		"rules": {
+			"eqeqeq": "warn",
+			"prettier/prettier": "warn"
+		},
+		"prettier": {
+			"singleQuote": true,
+			"printWidth": 120,
+			"endOfLine": "lf",
+			"tabWidth": 2
+		}
+	}
+}
