@@ -1,11 +1,10 @@
 const express = require('express');
 const app = express();
+const UserRouter = require('./user/UserRouter');
 
-//route handler for /api/1.0/users/register post request
-app.post('/api/1.0/users', (req, res) => {
-	return res.status(200).send({
-		message: 'User created',
-	});
-});
+// parse incoming request data with express native function json()
+app.use(express.json());
+
+app.use(UserRouter);
 
 module.exports = app;
