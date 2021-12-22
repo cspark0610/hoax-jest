@@ -16,7 +16,8 @@ User.init(
 		},
 		email: {
 			type: Sequelize.STRING,
-			allowNull: false,
+			// con el express-validator custom() no necesito el constrain en DB model USER
+			// unique: true,
 		},
 		password: {
 			type: Sequelize.STRING,
