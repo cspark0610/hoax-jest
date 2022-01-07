@@ -5,6 +5,7 @@ const User = require('../src/user/User');
 
 //to initialize the database with beforeAll
 const sequelize = require('../src/config/database');
+const { describe, options } = require('../src/user/User');
 
 beforeAll(() => {
 	return sequelize.sync();
@@ -30,7 +31,11 @@ const invalidEmail = {
 	password: 'P4ssword',
 };
 const postUser = (user = validUser) => {
-	return request(app).post('/api/1.0/users/register').send(user);
+	const agent = request(app).post('/api/1.0/users');
+	if (options.language) {
+		agent.set('Accept-Language', options.language);
+	}
+	return agent.send(user);
 };
 
 describe('user resgistration', () => {
@@ -179,23 +184,34 @@ describe('user resgistration', () => {
 		expect(body.validationErrors[field]).toBe(expectedMessage);
 	});
 	//dinamic test different approach
+
+	//adding internationalization , error messasges can be in different languages
+	const username_null = 'username cannot be null';
+	const username_size = 'username must be at least 4 characters and maximun 32 characters';
+	const email_null = 'email cannot be null';
+	const email_invalid = 'email is not valid';
+	const password_null = 'password cannot be null';
+	const password_size = 'password must be at least 6 characters';
+	const password_pattern = 'password must contain at least one uppercase letter, one lowercase letter and one number';
+	const email_inuse = 'email is already in use';
+	const user_create_success = 'user created successfully';
 	it.each`
 		field         | value              | expectedMessage
-		${'username'} | ${null}            | ${'username cannot be null'}
-		${'username'} | ${'123'}           | ${'username must be at least 4 characters and maximun 32 characters'}
-		${'username'} | ${'a'.repeat(33)}  | ${'username must be at least 4 characters and maximun 32 characters'}
-		${'email'}    | ${null}            | ${'email cannot be null'}
-		${'email'}    | ${'ail.com'}       | ${'email is not valid'}
-		${'email'}    | ${'user.mail.com'} | ${'email is not valid'}
-		${'email'}    | ${'user@mail'}     | ${'email is not valid'}
-		${'password'} | ${null}            | ${'password cannot be null'}
-		${'password'} | ${'P4ass'}         | ${'password must be at least 6 characters'}
-		${'password'} | ${'alllowercase'}  | ${'password must have al least one uppercase letter, one lowercase letter and one number'}
-		${'password'} | ${'ALLUPPERCASE'}  | ${'password must have al least one uppercase letter, one lowercase letter and one number'}
-		${'password'} | ${'123456789'}     | ${'password must have al least one uppercase letter, one lowercase letter and one number'}
-		${'password'} | ${'lowerUPPER'}    | ${'password must have al least one uppercase letter, one lowercase letter and one number'}
-		${'password'} | ${'lowerand12345'} | ${'password must have al least one uppercase letter, one lowercase letter and one number'}
-		${'password'} | ${'UPPERAND12345'} | ${'password must have al least one uppercase letter, one lowercase letter and one number'}
+		${'username'} | ${null}            | ${username_null}
+		${'username'} | ${'123'}           | ${username_size}
+		${'username'} | ${'a'.repeat(33)}  | ${username_size}
+		${'email'}    | ${null}            | ${email_null}
+		${'email'}    | ${'ail.com'}       | ${email_invalid}
+		${'email'}    | ${'user.mail.com'} | ${email_invalid}
+		${'email'}    | ${'user@mail'}     | ${email_invalid}
+		${'password'} | ${null}            | ${password_null}
+		${'password'} | ${'P4ass'}         | ${password_size}
+		${'password'} | ${'alllowercase'}  | ${password_pattern}
+		${'password'} | ${'ALLUPPERCASE'}  | ${password_pattern}
+		${'password'} | ${'123456789'}     | ${password_pattern}
+		${'password'} | ${'lowerUPPER'}    | ${password_pattern}
+		${'password'} | ${'lowerand12345'} | ${password_pattern}
+		${'password'} | ${'UPPERAND12345'} | ${password_pattern}
 	`('returns $expectedMessage when $field is $value', async ({ field, value, expectedMessage }) => {
 		//update user object with null according to value variable
 		const user = {
@@ -219,12 +235,76 @@ describe('user resgistration', () => {
 		const body = response.body;
 		expect(body.validationErrors.username).toBe('username must be at least 4 characters and maximun 32 characters');
 	});
-	it('returns email in use when same email is already in use', async () => {
+	it(`returns ${email_inuse} when same email is already in use`, async () => {
 		//voy a crear un user persistente en db usando el metodo User.create de Sequelize
 		// necesito forzar a la db que el campo email tenga un constrain en true para q  no permita guardar emails repetidos
 		await User.create({ ...validUser });
 		//luego mando una nueva request de crear un user usando el mismo email
 		const response = await postUser();
-		expect(response.body.validationErrors.email).toBe('email in use');
+		expect(response.body.validationErrors.email).toBe(email_inuse);
+	});
+});
+
+describe('internationalization', () => {
+	const username_null = 'username no puede ser nulo';
+	const username_size = 'username debe contener al menos 4 caracteres y maximo 32';
+	const email_null = 'email no puede ser nulo';
+	const email_invalid = 'email no valido';
+	const password_null = 'password no puede ser nulo';
+	const password_size = 'password debe contener al menos 6 caracteres';
+	const password_pattern = 'password debe contener al menos una letra mayuscula, una letra minuscula y un numero';
+	const email_inuse = 'email en uso';
+	const user_create_success = 'usuario creado';
+	it.each`
+		field         | value              | expectedMessage
+		${'username'} | ${null}            | ${username_null}
+		${'username'} | ${'123'}           | ${username_size}
+		${'username'} | ${'a'.repeat(33)}  | ${username_size}
+		${'email'}    | ${null}            | ${email_null}
+		${'email'}    | ${'ail.com'}       | ${email_invalid}
+		${'email'}    | ${'user.mail.com'} | ${email_invalid}
+		${'email'}    | ${'user@mail'}     | ${email_invalid}
+		${'password'} | ${null}            | ${password_null}
+		${'password'} | ${'P4ass'}         | ${password_size}
+		${'password'} | ${'alllowercase'}  | ${password_pattern}
+		${'password'} | ${'ALLUPPERCASE'}  | ${password_pattern}
+		${'password'} | ${'123456789'}     | ${password_pattern}
+		${'password'} | ${'lowerUPPER'}    | ${password_pattern}
+		${'password'} | ${'lowerand12345'} | ${password_pattern}
+		${'password'} | ${'UPPERAND12345'} | ${password_pattern}
+	`('returns $expectedMessage when $field is $value', async ({ field, value, expectedMessage }) => {
+		//update user object with null according to value variable
+		const user = {
+			username: 'user1',
+			email: 'user1@mail.com',
+			password: 'P4ssword',
+		};
+		user[field] = value;
+		const response = await postUser(user, { language: 'es' });
+		const body = response.body;
+		expect(body.validationErrors[field]).toBe(expectedMessage);
+	});
+
+	xit('returns size validation error when username is less than 4 characters', async () => {
+		const user = {
+			username: '123',
+			email: 'user1@mail.com',
+			password: 'P4ssword',
+		};
+		const response = await postUser(user);
+		const body = response.body;
+		expect(body.validationErrors.username).toBe('username must be at least 4 characters and maximun 32 characters');
+	});
+	it(`returns ${email_inuse} when same email is already in use when language is set tto spanish`, async () => {
+		//voy a crear un user persistente en db usando el metodo User.create de Sequelize
+		// necesito forzar a la db que el campo email tenga un constrain en true para q  no permita guardar emails repetidos
+		await User.create({ ...validUser });
+		//luego mando una nueva request de crear un user usando el mismo email
+		const response = await postUser({ ...validUser }, { language: 'es' });
+		expect(response.body.validationErrors.email).toBe(email_inuse);
+	});
+	it(`returns success message of ${user_create_success} when signup request is valid`, async () => {
+		const response = await postUser({ ...validUser }, { language: 'es' });
+		expect(response.body.message).toBe(user_create_success);
 	});
 });

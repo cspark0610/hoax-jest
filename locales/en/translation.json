@@ -1,0 +1,10 @@
+{
+	"username_null": "username cannot be null",
+	"username_size": "username must be at least 4 characters and maximun 32 characters",
+	"email_null": "email cannot be null",
+	"email_invalid": "email is not valid",
+	"password_null": "password cannot be null",
+	"password_size": "password must be at least 6 characters",
+	"password_pattern": "password must contain at least one uppercase letter, one lowercase letter and one number",
+	"email_inuse": "email is already in use"
+}
