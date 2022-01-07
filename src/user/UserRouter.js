@@ -101,7 +101,7 @@ router.post(
 
 		await UserService.save(req.body);
 		return res.status(200).send({
-			message: 'User created',
+			message: req.t('user_create_success'),
 		});
 	}
 );

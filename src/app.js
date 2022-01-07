@@ -23,10 +23,8 @@ i18next
 	});
 
 const app = express();
-
 //use i18 next
 app.use(middleware.handle(i18next));
-
 // parse incoming request data with express native function json()
 app.use(express.json());
 
