@@ -105,7 +105,7 @@ router.post(
 			});
 		} catch (error) {
 			return res.status(502).send({
-				message: 'email failure',
+				message: req.t(error.message),
 			});
 		}
 	}

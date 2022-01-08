@@ -7,5 +7,6 @@
 	"password_size": "password must be at least 6 characters",
 	"password_pattern": "password must contain at least one uppercase letter, one lowercase letter and one number",
 	"email_inuse": "email is already in use",
-	"user_create_success": "user created"
+	"user_create_success": "user created",
+	"email_failure": "email failure"
 }

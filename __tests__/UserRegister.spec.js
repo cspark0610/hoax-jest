@@ -8,7 +8,8 @@ const sequelize = require('../src/config/database');
 const nodeMailerStub = require('nodemailer-stub');
 
 const EmailService = require('../src/email/EmailService');
-console.log('ff', EmailService.sendEmailAccountActivation);
+//console.log('ff', EmailService.sendEmailAccountActivation);
+
 beforeAll(() => {
 	return sequelize.sync();
 });
@@ -290,6 +291,25 @@ describe('user resgistration', () => {
 		expect(response.status).toBe(502);
 		mockSendAccountActivation.mockRestore();
 	});
+	it('returns email failure message when sending emails fails', async () => {
+		const mockSendAccountActivation = jest
+			.spyOn(EmailService, 'sendEmailAccountActivation')
+			.mockRejectedValue({ message: 'failed to deliver email' });
+		const response = await postUser();
+		expect(mockSendAccountActivation).toHaveBeenCalled();
+		mockSendAccountActivation.mockRestore();
+		expect(response.body.message).toBe('email failure');
+	});
+	it('does not save user in database if activation email fails to be sent', async () => {
+		const mockSendAccountActivation = jest
+			.spyOn(EmailService, 'sendEmailAccountActivation')
+			.mockRejectedValue({ message: 'failed to deliver email' });
+		await postUser();
+		mockSendAccountActivation.mockRestore();
+		const users = await User.findAll();
+		//para que pase el test se debe user un try catch dentro de UserService
+		expect(users.length).toBe(0);
+	});
 });
 
 //adding internationalization , error messasges can be in different languages
@@ -303,6 +323,7 @@ describe('internationalization spanish', () => {
 	const password_pattern = 'password debe contener al menos una letra mayuscula, una letra minuscula y un numero';
 	const email_inuse = 'email en uso';
 	const user_create_success = 'usuario creado';
+	const email_failure = 'email fallido';
 	it.each`
 		field         | value              | expectedMessage
 		${'username'} | ${null}            | ${username_null}
@@ -354,5 +375,16 @@ describe('internationalization spanish', () => {
 	it(`returns success message of ${user_create_success} when signup request is valid`, async () => {
 		const response = await postUser({ ...validUser }, { language: 'es' });
 		expect(response.body.message).toBe(user_create_success);
+	});
+
+	it(`returns ${email_failure} message when sending emails fails`, async () => {
+		const mockSendAccountActivation = jest
+			.spyOn(EmailService, 'sendEmailAccountActivation')
+			.mockRejectedValue({ message: 'failed to deliver email' });
+		// debo postear un user con la configuracion en Español
+		const response = await postUser({ ...validUser }, { language: 'es' });
+		expect(mockSendAccountActivation).toHaveBeenCalled();
+		mockSendAccountActivation.mockRestore();
+		expect(response.body.message).toBe('email fallido');
 	});
 });
