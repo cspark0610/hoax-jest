@@ -5,7 +5,6 @@ const User = require('../src/user/User');
 
 //to initialize the database with beforeAll
 const sequelize = require('../src/config/database');
-const { describe, options } = require('../src/user/User');
 
 beforeAll(() => {
 	return sequelize.sync();
@@ -30,8 +29,8 @@ const invalidEmail = {
 	email: null,
 	password: 'P4ssword',
 };
-const postUser = (user = validUser) => {
-	const agent = request(app).post('/api/1.0/users');
+const postUser = (user = validUser, options = {}) => {
+	const agent = request(app).post('/api/1.0/users/register');
 	if (options.language) {
 		agent.set('Accept-Language', options.language);
 	}
@@ -51,7 +50,7 @@ describe('user resgistration', () => {
 	//no es buena practica hacer multiples expect dentro de un test it()
 	it('returns success message when signup request is valid', async () => {
 		const response = await postUser();
-		expect(response.body.message).toBe('User created');
+		expect(response.body.message).toBe('user created');
 	});
 
 	it('saves the user to database', async () => {

@@ -1,6 +1,6 @@
 {
 	"username_null": "username no puede ser nulo",
-	"username_size": " username debe contener al menos 4 caracteres y maximo 32",
+	"username_size": "username debe contener al menos 4 caracteres y maximo 32",
 	"email_null": "email no puede ser nulo",
 	"email_invalid": "email no valido",
 	"password_null": "password no puede ser nulo",

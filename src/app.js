@@ -10,7 +10,7 @@ i18next
 	.use(middleware.LanguageDetector)
 	.init({
 		//options objject
-		failbackLng: 'en',
+		fallbackLng: 'en',
 		lng: 'en',
 		ns: ['translation'],
 		defaultNS: 'translation',
