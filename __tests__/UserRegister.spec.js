@@ -5,7 +5,10 @@ const User = require('../src/user/User');
 
 //to initialize the database with beforeAll
 const sequelize = require('../src/config/database');
+const nodeMailerStub = require('nodemailer-stub');
 
+const EmailService = require('../src/email/EmailService');
+console.log('ff', EmailService.sendEmailAccountActivation);
 beforeAll(() => {
 	return sequelize.sync();
 });
@@ -241,6 +244,7 @@ describe('user resgistration', () => {
 		const response = await postUser();
 		expect(response.body.validationErrors.email).toBe(email_inuse);
 	});
+	// 20. INACTIVE MODE TEST
 	it('creates user in INACTIVE MODE: when storing user for the first time it will be stored as inactive mode', async () => {
 		await postUser();
 		const users = await User.findAll();
@@ -256,6 +260,7 @@ describe('user resgistration', () => {
 		// i would expect to have an activationToken field in which is stored the string token to activate the user
 		expect(savedUser.activationToken).toBeTruthy();
 	});
+	// 20 GENERATING RANDOM ACTIVATION TOKEN STRING FOR USER TEST
 	it('creates an ACTIVATION TOKEN for user', async () => {
 		await postUser();
 		const users = await User.findAll();
@@ -263,6 +268,27 @@ describe('user resgistration', () => {
 		// console.log(savedUser.activationToken);
 		// i would expect to have an "inactive" of type boolean property attached to savedUser
 		expect(savedUser.inactive).toBe(true);
+	});
+	// 21 SENDING EMAIL TO USER TEST, mock functionality of nodemailer send email with lib nodemailer-stub
+	it('sends an account activation email to user with activationToken', async () => {
+		await postUser();
+		const lastMail = nodeMailerStub.interactsWithMail.lastMail();
+		//lastMail.to is an array of all the emails sent
+		expect(lastMail.to).toContain('user1@mail.com');
+
+		// assertion about having the activation token in the body of the email
+		const users = await User.findAll();
+		const savedUser = users[0];
+		expect(lastMail.content).toContain(savedUser.activationToken);
+	});
+	it('returns 502 Bad Gateway error whem sending emails fails', async () => {
+		const mockSendAccountActivation = jest
+			.spyOn(EmailService, 'sendEmailAccountActivation')
+			.mockRejectedValue({ message: 'failed to deliver email' });
+		const response = await postUser();
+		expect(mockSendAccountActivation).toHaveBeenCalled();
+		expect(response.status).toBe(502);
+		mockSendAccountActivation.mockRestore();
 	});
 });
 

@@ -1,7 +1,7 @@
 const User = require('./User');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-
+const { sendEmailAccountActivation } = require('../email/EmailService');
 //separate function to generate activation token which is a random string for user
 const generateActivationToken = (length) => {
 	return crypto.randomBytes(length).toString('hex').substring(0, length);
@@ -16,6 +16,8 @@ const save = async (body) => {
 	// 3rd alternative
 	const user = { username, email, password: hashedPassword, activationToken: generateActivationToken(16) };
 	await User.create(user);
+	// send email with activation token
+	await sendEmailAccountActivation(email, user.activationToken);
 };
 
 const findByEmail = async (email) => {

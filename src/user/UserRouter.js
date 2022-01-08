@@ -98,11 +98,16 @@ router.post(
 		// 	// }
 		// 	return res.status(400).send(response);
 		// }
-
-		await UserService.save(req.body);
-		return res.status(200).send({
-			message: req.t('user_create_success'),
-		});
+		try {
+			await UserService.save(req.body);
+			return res.status(200).send({
+				message: req.t('user_create_success'),
+			});
+		} catch (error) {
+			return res.status(502).send({
+				message: 'email failure',
+			});
+		}
 	}
 );
 
