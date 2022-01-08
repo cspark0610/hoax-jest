@@ -184,7 +184,6 @@ describe('user resgistration', () => {
 	});
 	//dinamic test different approach
 
-	//adding internationalization , error messasges can be in different languages
 	const username_null = 'username cannot be null';
 	const username_size = 'username must be at least 4 characters and maximun 32 characters';
 	const email_null = 'email cannot be null';
@@ -242,9 +241,33 @@ describe('user resgistration', () => {
 		const response = await postUser();
 		expect(response.body.validationErrors.email).toBe(email_inuse);
 	});
+	it('creates user in INACTIVE MODE: when storing user for the first time it will be stored as inactive mode', async () => {
+		await postUser();
+		const users = await User.findAll();
+		const savedUser = users[0];
+		// i would expect to have an "inactive" of type boolean property attached to savedUser
+		expect(savedUser.inactive).toBe(true);
+	});
+	it('creates user in INACTIVE MODE even the request body contains inactive as false', async () => {
+		// la diferencia aca es que voy a mandar en el body un campo inactive con valor false de forma literal
+		await postUser({ ...validUser, inactive: false });
+		const users = await User.findAll();
+		const savedUser = users[0];
+		// i would expect to have an activationToken field in which is stored the string token to activate the user
+		expect(savedUser.activationToken).toBeTruthy();
+	});
+	it('creates an ACTIVATION TOKEN for user', async () => {
+		await postUser();
+		const users = await User.findAll();
+		const savedUser = users[0];
+		// console.log(savedUser.activationToken);
+		// i would expect to have an "inactive" of type boolean property attached to savedUser
+		expect(savedUser.inactive).toBe(true);
+	});
 });
 
-describe('internationalization', () => {
+//adding internationalization , error messasges can be in different languages
+describe('internationalization spanish', () => {
 	const username_null = 'username no puede ser nulo';
 	const username_size = 'username debe contener al menos 4 caracteres y maximo 32';
 	const email_null = 'email no puede ser nulo';

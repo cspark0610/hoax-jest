@@ -23,6 +23,14 @@ User.init(
 			type: Sequelize.STRING,
 			allowNull: false,
 		},
+		//new field that reflects if user is inactive of not, by default is set to true which means inactive
+		inactive: {
+			type: Sequelize.BOOLEAN,
+			defaultValue: true,
+		},
+		activationToken: {
+			type: Sequelize.STRING,
+		},
 	},
 	{ sequelize, modelName: 'user' }
 );
