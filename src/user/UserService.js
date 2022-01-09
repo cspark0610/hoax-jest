@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const EmailService = require('../email/EmailService');
 const sequelize = require('../config/database');
 const EmailException = require('../email/EmailException');
+const InvalidTokenException = require('./InvalidTokenException');
 
 //separate function to generate activation token which is a random string for user
 const generateActivationToken = (length) => {
@@ -44,7 +45,11 @@ const activate = async (token) => {
 			activationToken: token,
 		},
 	});
+	if (!user) {
+		throw new InvalidTokenException();
+	}
 	user.inactive = false;
+	user.activationToken = null;
 	await user.save();
 };
 

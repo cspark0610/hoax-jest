@@ -350,17 +350,70 @@ describe('user registration', () => {
 describe('account activation', () => {
 	// 23. ACTIVATING USER TEST
 	it('activates user account when correct activation token is sent', async () => {
-		//becasue i need a user in DB
+		//because need to create a user in db
 		await postUser();
 		let users = await User.findAll();
 		const token = users[0].activationToken;
-		//console.log(token);
+		// have to make a post request sending token to active user, it done with supertest
 		await request(app).post(`/api/1.0/users/token/${token}`).send();
 		users = await User.findAll();
-		//console.log('a', users[0].inactive);
-		expect(users[0].activationToken).toBe(token);
 		expect(users[0].inactive).toBe(false);
 	});
+
+	it('removes the token from user after successful activation', async () => {
+		await postUser();
+		let users = await User.findAll();
+		const token = users[0].activationToken;
+		// have to make a post request sending token to active user, it done with supertest
+		await request(app).post(`/api/1.0/users/token/${token}`).send();
+		users = await User.findAll();
+
+		expect(users[0].activationToken).toBeFalsy();
+	});
+	it('does not activate the user account when the token is wrong', async () => {
+		await postUser();
+		const token = 'wrong-token';
+		// have to make a post request sending token to active user, it done with supertest
+		await request(app).post(`/api/1.0/users/token/${token}`).send();
+		const users = await User.findAll();
+		expect(users[0].inactive).toBe(true);
+	});
+
+	it('returns bad request 400 status code when token is wrong', async () => {
+		await postUser();
+		const token = 'wrong-token';
+		// have to make a post request sending token to active user, it done with supertest
+		const response = await request(app).post(`/api/1.0/users/token/${token}`).send();
+		// 400 status code has to be settled in UserRouter, in catch block
+		expect(response.status).toBe(400);
+	});
+
+	it.each`
+		language | tokenStatus  | message
+		${'en'}  | ${'wrong'}   | ${'the account is either active or the token is invalid'}
+		${'es'}  | ${'wrong'}   | ${'la cuenta ya esta activada o el token es invalido'}
+		${'en'}  | ${'correct'} | ${'the account is activated'}
+		${'es'}  | ${'correct'} | ${'la cuenta esta activada'}
+	`(
+		'returns $message when tokenStatus is $tokenStatus sent and language is $language',
+		async ({ language, tokenStatus, message }) => {
+			await postUser();
+			let token = 'default-token';
+			if (tokenStatus == 'correct') {
+				// obtain token from db
+				const users = await User.findAll();
+				token = users[0].activationToken;
+			}
+
+			const response = await request(app)
+				.post(`/api/1.0/users/token/${token}`)
+				//para que funcione el test que validar el mensaje de error en distintos lenguajes
+				.set('Accept-Language', language)
+				.send();
+			// expect assertion is based in body.message
+			expect(response.body.message).toBe(message);
+		}
+	);
 });
 
 //adding internationalization , error messasges can be in different languages

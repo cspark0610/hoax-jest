@@ -8,5 +8,7 @@
 	"password_pattern": "password must contain at least one uppercase letter, one lowercase letter and one number",
 	"email_inuse": "email is already in use",
 	"user_create_success": "user created",
-	"email_failure": "email failure"
+	"email_failure": "email failure",
+	"account_activation_failure": "the account is either active or the token is invalid",
+	"account_activation_success": "the account is activated"
 }
