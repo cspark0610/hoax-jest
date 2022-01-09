@@ -71,7 +71,7 @@ const postUser = (user = validUser, options = {}) => {
 	return agent.send(user);
 };
 
-describe('user resgistration', () => {
+describe('user registration', () => {
 	it('returns 200 ok when request is valid', async () => {
 		//voy a iniciar el servidor y voy a mandar una peticion http para registro de usuario
 		// con supertest voy a hacer una peticion http, debo importar la instancia de app
@@ -345,6 +345,19 @@ describe('user resgistration', () => {
 		const users = await User.findAll();
 		//para que pase el test se debe user un try catch dentro de UserService
 		expect(users.length).toBe(0);
+	});
+	// 23. ACTIVATING USER TEST
+	it('activates user account when correct activation token is sent', async () => {
+		//becasue i need a user in DB
+		await postUser();
+		let users = await User.findAll();
+		const token = users[0].activationToken;
+		//console.log(token);
+		await request(app).post(`/api/1.0/users/token/${token}`).send();
+		users = await User.findAll();
+		//console.log('a', users[0]);
+		expect(users[0].activationToken).toBe(token);
+		expect(users[0].inactive).toBe(false);
 	});
 });
 

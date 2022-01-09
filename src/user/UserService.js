@@ -38,7 +38,17 @@ const findByEmail = async (email) => {
 	return await User.findOne({ where: { email } });
 };
 
-module.exports = { save, findByEmail };
+const activate = async (token) => {
+	const user = await User.findOne({
+		where: {
+			activationToken: token,
+		},
+	});
+	user.inactive = false;
+	await user.save();
+};
+
+module.exports = { save, findByEmail, activate };
 
 // 1st alternative literal object with all the fields
 // const user = {
