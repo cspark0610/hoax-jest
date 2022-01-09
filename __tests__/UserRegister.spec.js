@@ -6,7 +6,6 @@ const User = require('../src/user/User');
 //to initialize the database with beforeAll
 const sequelize = require('../src/config/database');
 const nodeMailerStub = require('nodemailer-stub');
-
 const EmailService = require('../src/email/EmailService');
 //SMTP server
 const { SMTPServer } = require('smtp-server');
@@ -346,6 +345,9 @@ describe('user registration', () => {
 		//para que pase el test se debe user un try catch dentro de UserService
 		expect(users.length).toBe(0);
 	});
+});
+
+describe('account activation', () => {
 	// 23. ACTIVATING USER TEST
 	it('activates user account when correct activation token is sent', async () => {
 		//becasue i need a user in DB
@@ -355,7 +357,7 @@ describe('user registration', () => {
 		//console.log(token);
 		await request(app).post(`/api/1.0/users/token/${token}`).send();
 		users = await User.findAll();
-		//console.log('a', users[0]);
+		//console.log('a', users[0].inactive);
 		expect(users[0].activationToken).toBe(token);
 		expect(users[0].inactive).toBe(false);
 	});
