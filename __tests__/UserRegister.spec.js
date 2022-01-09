@@ -347,8 +347,8 @@ describe('user registration', () => {
 	});
 });
 
+// 24. ACTIVATING USER TEST
 describe('account activation', () => {
-	// 23. ACTIVATING USER TEST
 	it('activates user account when correct activation token is sent', async () => {
 		//because need to create a user in db
 		await postUser();
