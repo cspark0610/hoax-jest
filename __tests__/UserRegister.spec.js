@@ -416,7 +416,7 @@ describe('account activation', () => {
 	);
 });
 
-//adding internationalization , error messasges can be in different languages
+//INTERNATIOALIZATION, error messasges can be in different languages
 describe('internationalization spanish', () => {
 	const username_null = 'username no puede ser nulo';
 	const username_size = 'username debe contener al menos 4 caracteres y maximo 32';
