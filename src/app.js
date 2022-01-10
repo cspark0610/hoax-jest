@@ -3,6 +3,7 @@ const UserRouter = require('./user/UserRouter');
 const i18next = require('i18next');
 const Backend = require('i18next-fs-backend');
 const middleware = require('i18next-http-middleware');
+const errorHandler = require('./error/ErrorHandler');
 
 //configure  i18next
 i18next
@@ -31,14 +32,6 @@ app.use(express.json());
 app.use(UserRouter);
 
 // error handling with express native function next()
-app.use((err, req, res, next) => {
-	const { status, message } = err;
-	// let validationErrors;
-	// if (errors.length) {
-	// 	validationErrors = {};
-	// 	errors.forEach((error) => (validationErrors[error.param] = req.t(error.msg)));
-	// }
-	res.status(status || 500).send({ message: req.t(message) });
-});
+app.use(errorHandler);
 
 module.exports = app;

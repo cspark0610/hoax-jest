@@ -226,6 +226,7 @@ describe('user registration', () => {
 	const password_pattern = 'password must contain at least one uppercase letter, one lowercase letter and one number';
 	const email_inuse = 'email is already in use';
 	const user_create_success = 'user created successfully';
+
 	it.each`
 		field         | value              | expectedMessage
 		${'username'} | ${null}            | ${username_null}
@@ -428,6 +429,7 @@ describe('internationalization spanish', () => {
 	const email_inuse = 'email en uso';
 	const user_create_success = 'usuario creado';
 	const email_failure = 'email fallido';
+	const validation_failure = 'validation failure';
 	it.each`
 		field         | value              | expectedMessage
 		${'username'} | ${null}            | ${username_null}

@@ -123,4 +123,14 @@ router.post('/api/1.0/users/token/:token', async (req, res, next) => {
 	}
 });
 
+// router for UserListing.spec
+router.get('/api/1.0/users', async (req, res, next) => {
+	try {
+		const result = await UserService.getUsers();
+		res.send(result);
+	} catch (error) {
+		next(error);
+	}
+});
+
 module.exports = router;
