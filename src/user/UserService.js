@@ -53,17 +53,21 @@ const activate = async (token) => {
 	await user.save();
 };
 
-const getUsers = async () => {
-	const users = await User.findAll({
+const getUsers = async (page, size) => {
+	//const pageSize = 10;
+	const usersWithCount = await User.findAndCountAll({
 		where: { inactive: false },
-		attributes: ['id', 'username', 'email'],
-		limit: 10,
+		attributes: ['id', 'username', 'email', 'inactive'],
+		limit: size,
+		//offset : a partir de que registro quiero empezar a mostrar
+		offset: size * page,
 	});
+	//math.ceil redondea hacia "arriba" 15inactivos/10 pageSize = 1.5 = 2
 	return {
-		content: users,
-		page: 0,
-		size: 10,
-		totalPages: 0,
+		content: usersWithCount.rows,
+		page,
+		size,
+		totalPages: Math.ceil(usersWithCount.count / size),
 	};
 };
 
