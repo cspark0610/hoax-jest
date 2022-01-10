@@ -5,6 +5,7 @@ const EmailService = require('../email/EmailService');
 const sequelize = require('../config/database');
 const EmailException = require('../email/EmailException');
 const InvalidTokenException = require('./InvalidTokenException');
+const UserNotFoundException = require('./UserNotFoundException');
 
 //separate function to generate activation token which is a random string for user
 const generateActivationToken = (length) => {
@@ -71,7 +72,21 @@ const getUsers = async (page, size) => {
 	};
 };
 
-module.exports = { save, findByEmail, activate, getUsers };
+const getUserById = async (id) => {
+	const user = await User.findOne({
+		where: {
+			id: id,
+			inactive: false,
+		},
+		attributes: ['id', 'username', 'email', 'inactive'],
+	});
+	if (!user) {
+		throw new UserNotFoundException();
+	}
+	return user;
+};
+
+module.exports = { save, findByEmail, activate, getUsers, getUserById };
 
 // 1st alternative literal object with all the fields
 // const user = {

@@ -5,6 +5,7 @@ const { check, validationResult } = require('express-validator');
 const User = require('./User');
 const ValidationException = require('../error/ValidationException');
 const pagination = require('../middleware/pagination');
+const UserNotFoundException = require('./UserNotFoundException');
 
 // MANUAL VALIDATION MIDDLEWARES
 // middlewares are meant to update req.validationErrors object
@@ -133,6 +134,17 @@ router.get('/api/1.0/users', pagination, async (req, res, next) => {
 	} catch (error) {
 		next(error);
 	}
+});
+
+router.get('/api/1.0/users/:id', async (req, res, next) => {
+	try {
+		const user = await UserService.getUserById(req.params.id);
+		res.status(200).send(user);
+	} catch (error) {
+		next(error);
+	}
+	//throw new UserNotFoundException();
+	//res.status(404).send({ message: req.t('user_not_found') });
 });
 
 module.exports = router;
