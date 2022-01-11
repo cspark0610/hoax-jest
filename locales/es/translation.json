@@ -12,5 +12,6 @@
 	"account_activation_failure": "la cuenta ya esta activada o el token es invalido",
 	"account_activation_success": "la cuenta esta activada",
 	"validation_failure": "validacion fallida",
-	"user_not_found": "no se encontró el usuario"
+	"user_not_found": "no se encontró el usuario",
+	"authentication_failure": "credenciales incorrectas"
 }
