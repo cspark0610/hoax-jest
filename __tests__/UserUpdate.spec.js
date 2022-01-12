@@ -5,7 +5,6 @@ const sequelize = require('../src/config/database');
 const bcrypt = require('bcrypt');
 const en = require('../locales/en/translation.json');
 const es = require('../locales/es/translation.json');
-const { detectExtension } = require('nodemailer/lib/mime-funcs/mime-types');
 
 // before start all tests, sync the database
 beforeAll(async () => {

@@ -3,6 +3,9 @@ const app = require('../src/app');
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
 const bcrypt = require('bcrypt');
+// import json from locales
+const en = require('../locales/en/translation.json');
+const es = require('../locales/es/translation.json');
 
 // before start all tests, sync the database
 beforeAll(async () => {
@@ -53,8 +56,8 @@ describe('authentication', () => {
 
 	it.each`
 		language | message
-		${'en'}  | ${'incorrect credentials'}
-		${'es'}  | ${'credenciales incorrectas'}
+		${'en'}  | ${en.authentication_failure}
+		${'es'}  | ${es.authentication_failure}
 	`('returns $message when user credentials are incorrect in language $language', async ({ language, message }) => {
 		const response = await postAuthentication({ email: 'user1@mail.com', password: 'password' }, { language });
 		expect(response.body.message).toBe(message);
