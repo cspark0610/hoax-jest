@@ -5,7 +5,7 @@
 	"main": "app.js",
 	"scripts": {
 		"start": "cross-env NODE_ENV=development nodemon app.js",
-		"jest": "cross-env NODE_ENV=test jest --watch --verbose",
+		"jest": "cross-env NODE_ENV=test jest --watch",
 		"lint": "eslint . --fix",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},

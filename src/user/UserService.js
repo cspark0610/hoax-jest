@@ -6,6 +6,7 @@ const sequelize = require('../config/database');
 const EmailException = require('../email/EmailException');
 const InvalidTokenException = require('./InvalidTokenException');
 const UserNotFoundException = require('./UserNotFoundException');
+const { Op } = require('sequelize');
 
 //separate function to generate activation token which is a random string for user
 const generateActivationToken = (length) => {
@@ -55,9 +56,14 @@ const activate = async (token) => {
 };
 
 const getUsers = async (page, size) => {
-	//const pageSize = 10;
 	const usersWithCount = await User.findAndCountAll({
-		where: { inactive: false },
+		where: {
+			inactive: false,
+			// //want to exclude the logged in user from the list of users paginated using its id
+			// id: {
+			// 	[Op.not]: authenticatedUser ? authenticatedUser.id : 0,
+			// },
+		},
 		attributes: ['id', 'username', 'email', 'inactive'],
 		limit: size,
 		//offset : a partir de que registro quiero empezar a mostrar
@@ -86,7 +92,7 @@ const getUserById = async (id) => {
 	return user;
 };
 
-updateUser = async (id, body) => {
+const updateUser = async (id, body) => {
 	const user = await User.findOne({ where: { id } });
 	//puedo editar solamente el username y el email, el password entra en otro moodulo
 	const { username, email } = body;
@@ -96,7 +102,7 @@ updateUser = async (id, body) => {
 	await user.save();
 };
 
-module.exports = { save, findByEmail, activate, getUsers, getUserById };
+module.exports = { save, findByEmail, activate, getUsers, getUserById, updateUser };
 
 // 1st alternative literal object with all the fields
 // const user = {

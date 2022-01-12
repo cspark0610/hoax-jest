@@ -2,6 +2,7 @@ const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
+const bc = require('bcrypt');
 
 beforeAll(async () => {
 	await sequelize.sync();
@@ -10,15 +11,21 @@ beforeEach(async () => {
 	await User.destroy({ truncate: true });
 });
 
-const getUsers = () => {
-	return request(app).get('/api/1.0/users');
+const getUsers = (options = {}) => {
+	// need to update this function to recieve auth object options
+	let agent = request(app).get('/api/1.0/users');
+	if (options.auth) {
+		const { email, password } = options.auth;
+		agent.auth(email, password);
+	}
+	return agent.send();
 };
 const addUsers = async (activeUserCount, inactiveUserCount = 0) => {
 	for (let i = 0; i < activeUserCount + inactiveUserCount; i++) {
 		await User.create({
 			username: `user${i + 1}`,
 			email: `user${i + 1}@mail.com`,
-			password: 'password',
+			password: await bc.hash('P4ssword', 10),
 			inactive: i >= activeUserCount,
 		});
 	}
@@ -109,6 +116,16 @@ describe('listing users', () => {
 		const response = await getUsers().query({ size: 'size', page: 'page' });
 		expect(response.body.size).toBe(10);
 		expect(response.body.page).toBe(0);
+	});
+	xit('returns user page withouot logged in user when request has valid authorization', async () => {
+		await addUsers(11);
+		const response = await getUsers({
+			auth: {
+				email: 'user1@mail.com',
+				password: 'P4ssword',
+			},
+		});
+		expect(response.body.totalPages).toBe(1);
 	});
 });
 

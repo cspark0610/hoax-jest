@@ -126,13 +126,10 @@ router.post('/api/1.0/users/token/:token', async (req, res, next) => {
 
 // router for UserListing.spec
 router.get('/api/1.0/users', pagination, async (req, res, next) => {
-	try {
-		const { size, page } = req.pagination;
-		const result = await UserService.getUsers(page, size);
-		res.send(result);
-	} catch (error) {
-		next(error);
-	}
+	const authenticatedUser = req.authenticatedUser;
+	const { size, page } = req.pagination;
+	const users = await UserService.getUsers(page, size, authenticatedUser);
+	res.send(users);
 });
 
 router.get('/api/1.0/users/:id', async (req, res, next) => {
@@ -147,7 +144,10 @@ router.get('/api/1.0/users/:id', async (req, res, next) => {
 router.put('/api/1.0/users/:id', basicAuthentication, async (req, res, next) => {
 	const authenticatedUser = req.authenticatedUser;
 
-	if (!authenticatedUser || authenticatedUser.id != req.params.id) {
+	if (!authenticatedUser) {
+		return next(new ForbiddenException('unauthorized_user_update'));
+	}
+	if (authenticatedUser.id != req.params.id) {
 		return next(new ForbiddenException('unauthorized_user_update'));
 	}
 	await UserService.updateUser(req.params.id, req.body);

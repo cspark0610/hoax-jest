@@ -28,6 +28,7 @@ const putUser = async (id = 5, body = null, options = {}) => {
 		// o usar la funcion de supertest .auth
 		// agent.auth(email, password);
 	}
+
 	return agent.send(body);
 };
 const activeUser = {
@@ -90,6 +91,7 @@ describe('user update', () => {
 		const response = await putUser(savedUser.id, validUpdateBody, {
 			auth: { email: savedUser.email, password: 'P4ssword' },
 		});
+
 		expect(response.status).toBe(200);
 	});
 

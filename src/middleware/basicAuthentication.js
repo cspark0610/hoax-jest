@@ -7,7 +7,7 @@ const basicAuthentication = async (req, res, next) => {
 	const authorizationHeader = req.headers.authorization;
 	if (authorizationHeader) {
 		// Basic ....
-		const encoded = authorizationHeader.split(' ')[0];
+		const encoded = authorizationHeader.substring(6);
 		const decoded = Buffer.from(encoded, 'base64').toString('ascii');
 		const [email, password] = decoded.split(':');
 
@@ -19,8 +19,9 @@ const basicAuthentication = async (req, res, next) => {
 				req.authenticatedUser = user;
 			}
 		}
-		next();
 	}
+
+	next();
 };
 
 module.exports = basicAuthentication;

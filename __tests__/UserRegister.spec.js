@@ -37,7 +37,7 @@ beforeAll(async () => {
 	});
 	await server.listen(5857, 'localhost');
 	await sequelize.sync();
-	jest.setTimeout(20000);
+	jest.setTimeout(30000);
 });
 //before the execution of EACH test iam going to use beforeEach() function
 //destroy User Table before each test
