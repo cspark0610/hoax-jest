@@ -13,5 +13,6 @@
 	"account_activation_success": "the account is activated",
 	"validation_failure": "validation failure",
 	"user_not_found": "user not found",
-	"authentication_failure": "incorrect credentials"
+	"authentication_failure": "incorrect credentials",
+	"unauthorized_user_update": "you are not authorized to update user without authenthication"
 }

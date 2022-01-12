@@ -9,8 +9,8 @@ beforeAll(async () => {
 	await sequelize.sync();
 });
 
-beforeEach(() => {
-	return User.destroy({ truncate: true });
+beforeEach(async () => {
+	await User.destroy({ truncate: true });
 });
 describe('authentication', () => {
 	const validUser = { username: 'user1', email: 'user1@mail.com', password: 'P4ssword', inactive: false };

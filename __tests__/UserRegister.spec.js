@@ -9,6 +9,9 @@ const nodeMailerStub = require('nodemailer-stub');
 const EmailService = require('../src/email/EmailService');
 //SMTP server
 const { SMTPServer } = require('smtp-server');
+// import json from locales
+const en = require('../locales/en/translation.json');
+const es = require('../locales/es/translation.json');
 
 let lastMail;
 let server;
@@ -34,6 +37,7 @@ beforeAll(async () => {
 	});
 	await server.listen(5857, 'localhost');
 	await sequelize.sync();
+	jest.setTimeout(20000);
 });
 //before the execution of EACH test iam going to use beforeEach() function
 //destroy User Table before each test
@@ -45,6 +49,7 @@ beforeEach(() => {
 //close SMTP server after each test
 afterAll(async () => {
 	await server.close();
+	jest.setTimeout(5000);
 });
 
 const validUser = {
@@ -72,37 +77,19 @@ const postUser = (user = validUser, options = {}) => {
 
 describe('user registration', () => {
 	it('returns 200 ok when request is valid', async () => {
-		//voy a iniciar el servidor y voy a mandar una peticion http para registro de usuario
-		// con supertest voy a hacer una peticion http, debo importar la instancia de app
-		// e importar libreria supertest
 		const response = await postUser();
 		//console.log(response);
 		expect(response.statusCode).toBe(200);
 	});
-
-	//no es buena practica hacer multiples expect dentro de un test it()
 	it('returns success message when signup request is valid', async () => {
 		const response = await postUser();
-		expect(response.body.message).toBe('user created');
+		expect(response.body.message).toBe(en.user_create_success);
 	});
 
 	it('saves the user to database', async () => {
 		await postUser();
 		const userList = await User.findAll();
 		expect(userList.length).toBe(1);
-		// request(app)
-		// 	.post('/api/1.0/users/register')
-		// 	.send({
-		// 		username: 'user1',
-		// 		email: 'user1@mail.com',
-		// 		password: 'P4ssword',
-		// 	})
-		// 	.then(() => {
-		// 		User.findAll().then((userList) => {
-		// 			expect(userList.length).toBe(1);
-		// 			done();
-		// 		});
-		// 	});
 	});
 	it('saves the username and email to database', async () => {
 		await postUser();
@@ -110,22 +97,6 @@ describe('user registration', () => {
 		const savedUser = userList[0];
 		expect(savedUser.username).toBe('user1');
 		expect(savedUser.email).toBe('user1@mail.com');
-
-		// request(app)
-		// 	.post('/api/1.0/users/register')
-		// 	.send({
-		// 		username: 'user1',
-		// 		email: 'user1@mail.com',
-		// 		password: 'P4ssword',
-		// 	})
-		// 	.then(() => {
-		// 		User.findAll().then((userList) => {
-		// 			const savedUser = userList[0];
-		// 			expect(savedUser.username).toBe('user1');
-		// 			expect(savedUser.email).toBe('user1@mail.com');
-		// 			done();
-		// 		});
-		// 	});
 	});
 	it('hashes the password and stores it hased in database', async () => {
 		//use bcrypt to hash the password inside route handler and expect the hashed password not to be the same as the password
@@ -134,21 +105,6 @@ describe('user registration', () => {
 		const savedUser = userList[0];
 		expect(savedUser.username).toBe('user1');
 		expect(savedUser.email).toBe('user1@mail.com');
-
-		// 	request(app)
-		// 		.post('/api/1.0/users/register')
-		// 		.send({
-		// 			username: 'user1',
-		// 			email: 'user1@mail.com',
-		// 			password: 'P4ssword',
-		// 		})
-		// 		.then(() => {
-		// 			User.findAll().then((userList) => {
-		// 				const savedUser = userList[0];
-		// 				expect(savedUser.password).not.toBe('P4ssword');
-		// 				done();
-		// 			});
-		// 		});
 	});
 	it('returns a 400 when username is null', async () => {
 		const response = await postUser(invalidUser);
@@ -177,7 +133,6 @@ describe('user registration', () => {
 			password: 'P4ssword',
 		});
 		const body = response.body;
-		//console.log('hola', body);
 		// {
 		//   validationErrors: {
 		//     username: 'Username cannot be null',
@@ -215,35 +170,25 @@ describe('user registration', () => {
 		const body = response.body;
 		expect(body.validationErrors[field]).toBe(expectedMessage);
 	});
+
 	//dinamic test different approach
-
-	const username_null = 'username cannot be null';
-	const username_size = 'username must be at least 4 characters and maximun 32 characters';
-	const email_null = 'email cannot be null';
-	const email_invalid = 'email is not valid';
-	const password_null = 'password cannot be null';
-	const password_size = 'password must be at least 6 characters';
-	const password_pattern = 'password must contain at least one uppercase letter, one lowercase letter and one number';
-	const email_inuse = 'email is already in use';
-	const user_create_success = 'user created successfully';
-
 	it.each`
 		field         | value              | expectedMessage
-		${'username'} | ${null}            | ${username_null}
-		${'username'} | ${'123'}           | ${username_size}
-		${'username'} | ${'a'.repeat(33)}  | ${username_size}
-		${'email'}    | ${null}            | ${email_null}
-		${'email'}    | ${'ail.com'}       | ${email_invalid}
-		${'email'}    | ${'user.mail.com'} | ${email_invalid}
-		${'email'}    | ${'user@mail'}     | ${email_invalid}
-		${'password'} | ${null}            | ${password_null}
-		${'password'} | ${'P4ass'}         | ${password_size}
-		${'password'} | ${'alllowercase'}  | ${password_pattern}
-		${'password'} | ${'ALLUPPERCASE'}  | ${password_pattern}
-		${'password'} | ${'123456789'}     | ${password_pattern}
-		${'password'} | ${'lowerUPPER'}    | ${password_pattern}
-		${'password'} | ${'lowerand12345'} | ${password_pattern}
-		${'password'} | ${'UPPERAND12345'} | ${password_pattern}
+		${'username'} | ${null}            | ${en.username_null}
+		${'username'} | ${'123'}           | ${en.username_size}
+		${'username'} | ${'a'.repeat(33)}  | ${en.username_size}
+		${'email'}    | ${null}            | ${en.email_null}
+		${'email'}    | ${'ail.com'}       | ${en.email_invalid}
+		${'email'}    | ${'user.mail.com'} | ${en.email_invalid}
+		${'email'}    | ${'user@mail'}     | ${en.email_invalid}
+		${'password'} | ${null}            | ${en.password_null}
+		${'password'} | ${'P4ass'}         | ${en.password_size}
+		${'password'} | ${'alllowercase'}  | ${en.password_pattern}
+		${'password'} | ${'ALLUPPERCASE'}  | ${en.password_pattern}
+		${'password'} | ${'123456789'}     | ${en.password_pattern}
+		${'password'} | ${'lowerUPPER'}    | ${en.password_pattern}
+		${'password'} | ${'lowerand12345'} | ${en.password_pattern}
+		${'password'} | ${'UPPERAND12345'} | ${en.password_pattern}
 	`('returns $expectedMessage when $field is $value', async ({ field, value, expectedMessage }) => {
 		//update user object with null according to value variable
 		const user = {
@@ -265,15 +210,15 @@ describe('user registration', () => {
 		};
 		const response = await postUser(user);
 		const body = response.body;
-		expect(body.validationErrors.username).toBe('username must be at least 4 characters and maximun 32 characters');
+		expect(body.validationErrors.username).toBe(en.username_size);
 	});
-	it(`returns ${email_inuse} when same email is already in use`, async () => {
+	it(`returns ${en.email_inuse} when same email is already in use`, async () => {
 		//voy a crear un user persistente en db usando el metodo User.create de Sequelize
 		// necesito forzar a la db que el campo email tenga un constrain en true para q  no permita guardar emails repetidos
 		await User.create({ ...validUser });
 		//luego mando una nueva request de crear un user usando el mismo email
 		const response = await postUser();
-		expect(response.body.validationErrors.email).toBe(email_inuse);
+		expect(response.body.validationErrors.email).toBe(en.email_inuse);
 	});
 	// 20. INACTIVE MODE TEST
 	it('creates user in INACTIVE MODE: when storing user for the first time it will be stored as inactive mode', async () => {
@@ -391,10 +336,10 @@ describe('account activation', () => {
 
 	it.each`
 		language | tokenStatus  | message
-		${'en'}  | ${'wrong'}   | ${'the account is either active or the token is invalid'}
-		${'es'}  | ${'wrong'}   | ${'la cuenta ya esta activada o el token es invalido'}
-		${'en'}  | ${'correct'} | ${'the account is activated'}
-		${'es'}  | ${'correct'} | ${'la cuenta esta activada'}
+		${'en'}  | ${'wrong'}   | ${en.account_activation_failure}
+		${'es'}  | ${'wrong'}   | ${es.account_activation_failure}
+		${'en'}  | ${'correct'} | ${en.account_activation_success}
+		${'es'}  | ${'correct'} | ${es.account_activation_success}
 	`(
 		'returns $message when tokenStatus is $tokenStatus sent and language is $language',
 		async ({ language, tokenStatus, message }) => {
@@ -419,35 +364,24 @@ describe('account activation', () => {
 
 //INTERNATIOALIZATION, error messasges can be in different languages
 describe('internationalization spanish', () => {
-	const username_null = 'username no puede ser nulo';
-	const username_size = 'username debe contener al menos 4 caracteres y maximo 32';
-	const email_null = 'email no puede ser nulo';
-	const email_invalid = 'email no valido';
-	const password_null = 'password no puede ser nulo';
-	const password_size = 'password debe contener al menos 6 caracteres';
-	const password_pattern = 'password debe contener al menos una letra mayuscula, una letra minuscula y un numero';
-	const email_inuse = 'email en uso';
-	const user_create_success = 'usuario creado';
-	const email_failure = 'email fallido';
-	const validation_failure = 'validation failure';
 	it.each`
-		field         | value              | expectedMessage
-		${'username'} | ${null}            | ${username_null}
-		${'username'} | ${'123'}           | ${username_size}
-		${'username'} | ${'a'.repeat(33)}  | ${username_size}
-		${'email'}    | ${null}            | ${email_null}
-		${'email'}    | ${'ail.com'}       | ${email_invalid}
-		${'email'}    | ${'user.mail.com'} | ${email_invalid}
-		${'email'}    | ${'user@mail'}     | ${email_invalid}
-		${'password'} | ${null}            | ${password_null}
-		${'password'} | ${'P4ass'}         | ${password_size}
-		${'password'} | ${'alllowercase'}  | ${password_pattern}
-		${'password'} | ${'ALLUPPERCASE'}  | ${password_pattern}
-		${'password'} | ${'123456789'}     | ${password_pattern}
-		${'password'} | ${'lowerUPPER'}    | ${password_pattern}
-		${'password'} | ${'lowerand12345'} | ${password_pattern}
-		${'password'} | ${'UPPERAND12345'} | ${password_pattern}
-	`('returns $expectedMessage when $field is $value', async ({ field, value, expectedMessage }) => {
+		field         | value              | message
+		${'username'} | ${null}            | ${es.username_null}
+		${'username'} | ${'123'}           | ${es.username_size}
+		${'username'} | ${'a'.repeat(33)}  | ${es.username_size}
+		${'email'}    | ${null}            | ${es.email_null}
+		${'email'}    | ${'ail.com'}       | ${es.email_invalid}
+		${'email'}    | ${'user.mail.com'} | ${es.email_invalid}
+		${'email'}    | ${'user@mail'}     | ${es.email_invalid}
+		${'password'} | ${null}            | ${es.password_null}
+		${'password'} | ${'P4ass'}         | ${es.password_size}
+		${'password'} | ${'alllowercase'}  | ${es.password_pattern}
+		${'password'} | ${'ALLUPPERCASE'}  | ${es.password_pattern}
+		${'password'} | ${'123456789'}     | ${es.password_pattern}
+		${'password'} | ${'lowerUPPER'}    | ${es.password_pattern}
+		${'password'} | ${'lowerand12345'} | ${es.password_pattern}
+		${'password'} | ${'UPPERAND12345'} | ${es.password_pattern}
+	`('returns $message when $field is $value', async ({ field, value, message }) => {
 		//update user object with null according to value variable
 		const user = {
 			username: 'user1',
@@ -457,33 +391,23 @@ describe('internationalization spanish', () => {
 		user[field] = value;
 		const response = await postUser(user, { language: 'es' });
 		const body = response.body;
-		expect(body.validationErrors[field]).toBe(expectedMessage);
+		expect(body.validationErrors[field]).toBe(message);
 	});
 
-	xit('returns size validation error when username is less than 4 characters', async () => {
-		const user = {
-			username: '123',
-			email: 'user1@mail.com',
-			password: 'P4ssword',
-		};
-		const response = await postUser(user);
-		const body = response.body;
-		expect(body.validationErrors.username).toBe('username must be at least 4 characters and maximun 32 characters');
-	});
-	it(`returns ${email_inuse} when same email is already in use when language is set tto spanish`, async () => {
+	it(`returns ${es.email_inuse} when same email is already in use when language is set tto spanish`, async () => {
 		//voy a crear un user persistente en db usando el metodo User.create de Sequelize
 		// necesito forzar a la db que el campo email tenga un constrain en true para q  no permita guardar emails repetidos
 		await User.create({ ...validUser });
 		//luego mando una nueva request de crear un user usando el mismo email
 		const response = await postUser({ ...validUser }, { language: 'es' });
-		expect(response.body.validationErrors.email).toBe(email_inuse);
+		expect(response.body.validationErrors.email).toBe(es.email_inuse);
 	});
-	it(`returns success message of ${user_create_success} when signup request is valid`, async () => {
+	it(`returns success message of ${es.user_create_success} when signup request is valid`, async () => {
 		const response = await postUser({ ...validUser }, { language: 'es' });
-		expect(response.body.message).toBe(user_create_success);
+		expect(response.body.message).toBe(es.user_create_success);
 	});
 
-	it(`returns ${email_failure} message when sending emails fails`, async () => {
+	it(`returns ${es.email_failure} message when sending emails fails`, async () => {
 		// const mockSendAccountActivation = jest
 		// 	.spyOn(EmailService, 'sendEmailAccountActivation')
 		// 	.mockRejectedValue({ message: 'failed to deliver email' });
@@ -492,6 +416,6 @@ describe('internationalization spanish', () => {
 		const response = await postUser({ ...validUser }, { language: 'es' });
 		// expect(mockSendAccountActivation).toHaveBeenCalled();
 		// mockSendAccountActivation.mockRestore();
-		expect(response.body.message).toBe('email fallido');
+		expect(response.body.message).toBe(es.email_failure);
 	});
 });

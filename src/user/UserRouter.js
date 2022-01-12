@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 const UserService = require('./UserService');
 const { check, validationResult } = require('express-validator');
-const User = require('./User');
-const ValidationException = require('../error/ValidationException');
 const pagination = require('../middleware/pagination');
-const UserNotFoundException = require('./UserNotFoundException');
+const ForbiddenException = require('../error/ForbiddenException');
+const basicAuthentication = require('../middleware/basicAuthentication');
 
 // MANUAL VALIDATION MIDDLEWARES
 // middlewares are meant to update req.validationErrors object
@@ -143,8 +142,16 @@ router.get('/api/1.0/users/:id', async (req, res, next) => {
 	} catch (error) {
 		next(error);
 	}
-	//throw new UserNotFoundException();
-	//res.status(404).send({ message: req.t('user_not_found') });
+});
+
+router.put('/api/1.0/users/:id', basicAuthentication, async (req, res, next) => {
+	const authenticatedUser = req.authenticatedUser;
+
+	if (!authenticatedUser || authenticatedUser.id != req.params.id) {
+		return next(new ForbiddenException('unauthorized_user_update'));
+	}
+	await UserService.updateUser(req.params.id, req.body);
+	return res.status(200).send();
 });
 
 module.exports = router;

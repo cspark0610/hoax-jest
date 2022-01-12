@@ -86,6 +86,16 @@ const getUserById = async (id) => {
 	return user;
 };
 
+updateUser = async (id, body) => {
+	const user = await User.findOne({ where: { id } });
+	//puedo editar solamente el username y el email, el password entra en otro moodulo
+	const { username, email } = body;
+	if (user.username) user.username = username;
+	if (user.email) user.email = email;
+
+	await user.save();
+};
+
 module.exports = { save, findByEmail, activate, getUsers, getUserById };
 
 // 1st alternative literal object with all the fields

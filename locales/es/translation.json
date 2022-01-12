@@ -13,5 +13,6 @@
 	"account_activation_success": "la cuenta esta activada",
 	"validation_failure": "validacion fallida",
 	"user_not_found": "no se encontró el usuario",
-	"authentication_failure": "credenciales incorrectas"
+	"authentication_failure": "credenciales incorrectas",
+	"unauthorized_user_update": "no estas autorizado a actualizar el usuario sin autenticarte"
 }
