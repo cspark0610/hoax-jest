@@ -11,12 +11,25 @@ beforeEach(async () => {
 	await User.destroy({ truncate: true });
 });
 
+const auth = async (options = {}) => {
+	// este funcion  rebice un objeto options con la propiedad token y la retorna
+	let token;
+	if (options.auth) {
+		let response = await request(app).post('/api/1.0/auth').send(options.auth);
+		token = response.body.token ? response.body.token : '';
+	}
+	return token;
+};
+
 const getUsers = (options = {}) => {
 	// need to update this function to recieve auth object options
 	let agent = request(app).get('/api/1.0/users');
-	if (options.auth) {
-		const { email, password } = options.auth;
-		agent.auth(email, password);
+	// if (options.auth) {
+	// 	const { email, password } = options.auth;
+	// 	agent.auth(email, password);
+	// }
+	if (options.token) {
+		agent.set('Authorization', `Bearer ${options.token}`);
 	}
 	return agent.send();
 };
@@ -117,14 +130,16 @@ describe('listing users', () => {
 		expect(response.body.size).toBe(10);
 		expect(response.body.page).toBe(0);
 	});
-	xit('returns user page withouot logged in user when request has valid authorization', async () => {
+	it('returns user page withouot logged in user when request has valid authorization', async () => {
 		await addUsers(11);
-		const response = await getUsers({
+		//get token with auth function
+		const token = auth({
 			auth: {
 				email: 'user1@mail.com',
 				password: 'P4ssword',
 			},
 		});
+		const response = await getUsers({ token: token });
 		expect(response.body.totalPages).toBe(1);
 	});
 });

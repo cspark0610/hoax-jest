@@ -5,6 +5,7 @@ const { check, validationResult } = require('express-validator');
 const pagination = require('../middleware/pagination');
 const ForbiddenException = require('../error/ForbiddenException');
 const basicAuthentication = require('../middleware/basicAuthentication');
+const jwtAuthentication = require('../middleware/jwtAuthetication');
 
 // MANUAL VALIDATION MIDDLEWARES
 // middlewares are meant to update req.validationErrors object
@@ -125,7 +126,7 @@ router.post('/api/1.0/users/token/:token', async (req, res, next) => {
 });
 
 // router for UserListing.spec
-router.get('/api/1.0/users', pagination, async (req, res, next) => {
+router.get('/api/1.0/users', pagination, jwtAuthentication, async (req, res, next) => {
 	const authenticatedUser = req.authenticatedUser;
 	const { size, page } = req.pagination;
 	const users = await UserService.getUsers(page, size, authenticatedUser);
@@ -141,7 +142,7 @@ router.get('/api/1.0/users/:id', async (req, res, next) => {
 	}
 });
 
-router.put('/api/1.0/users/:id', basicAuthentication, async (req, res, next) => {
+router.put('/api/1.0/users/:id', jwtAuthentication, async (req, res, next) => {
 	const authenticatedUser = req.authenticatedUser;
 
 	if (!authenticatedUser) {

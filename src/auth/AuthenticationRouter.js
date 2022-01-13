@@ -5,6 +5,7 @@ const AuthenticationException = require('./AuthenticationException');
 const ForbiddenException = require('../error/ForbiddenException');
 const bcrypt = require('bcrypt');
 const { check, validationResult } = require('express-validator');
+const { createToken } = require('./TokenService');
 
 router.post('/api/1.0/auth', check('email').isEmail(), async (req, res, next) => {
 	const errors = validationResult(req);
@@ -32,6 +33,8 @@ router.post('/api/1.0/auth', check('email').isEmail(), async (req, res, next) =>
 	res.send({
 		id: user.id,
 		username: user.username,
+		// add new field in response.body in which we will store the token
+		token: createToken(user),
 	});
 });
 

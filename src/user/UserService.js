@@ -55,18 +55,19 @@ const activate = async (token) => {
 	await user.save();
 };
 
-const getUsers = async (page, size) => {
+const getUsers = async (page, size, authenticatedUser) => {
+	const authenticatedUserId = authenticatedUser ? authenticatedUser.id : 0;
 	const usersWithCount = await User.findAndCountAll({
 		where: {
 			inactive: false,
-			// //want to exclude the logged in user from the list of users paginated using its id
-			// id: {
-			// 	[Op.not]: authenticatedUser ? authenticatedUser.id : 0,
-			// },
+			// want to exclude the logged in user from the list of users paginated using its id
+			id: {
+				[Op.not]: authenticatedUserId,
+			},
 		},
 		attributes: ['id', 'username', 'email', 'inactive'],
 		limit: size,
-		//offset : a partir de que registro quiero empezar a mostrar
+		//offset : a partir de que numero de registro quiero empezar a mostrar (siempre los indices empiezan en cero)
 		offset: size * page,
 	});
 	//math.ceil redondea hacia "arriba" 15inactivos/10 pageSize = 1.5 = 2

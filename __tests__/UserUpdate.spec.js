@@ -14,19 +14,32 @@ beforeEach(async () => {
 	await User.destroy({ truncate: true });
 });
 const putUser = async (id = 5, body = null, options = {}) => {
-	let agent = request(app).put(`/api/1.0/users/${id}`);
+	// refactor to receive jwt token
+	let agent = request(app);
+	let token;
+	if (options.auth) {
+		// // create basic auth header with node Buffer
+		// // Authorization: 'Basic nvdjn....'
+		// const { email, password } = options.auth;
+		// const base64 = Buffer.from(`${email}:${password}`).toString('base64');
+		// agent.set('Authorization', `Basic ${base64}`);
+		// // o usar la funcion de supertest .auth
+		// // agent.auth(email, password);
+		let response = await agent.post('/api/1.0/auth').send(options.auth);
+		token = response.body.token ? response.body.token : '';
+	}
+	agent = request(app).put(`/api/1.0/users/${id}`);
+
 	if (options.language) {
 		agent.set('Accept-Language', options.language);
 	}
-	if (options.auth) {
-		// create basic auth header with node Buffer
-		// Authorization: 'Basic nvdjn....'
-		const { email, password } = options.auth;
-		const base64 = Buffer.from(`${email}:${password}`).toString('base64');
-		agent.set('Authorization', `Basic ${base64}`);
 
-		// o usar la funcion de supertest .auth
-		// agent.auth(email, password);
+	if (token) {
+		agent.set('Authorization', `Bearer ${token}`);
+	}
+	if (options.token) {
+		// contemplo el caso de que el token venga dentro del objeto options
+		agent.set('Authorization', `Bearer ${options.token}`);
 	}
 
 	return agent.send(body);
@@ -103,5 +116,9 @@ describe('user update', () => {
 		});
 		const updatedUserInDB = await User.findOne({ where: { id: savedUser.id } });
 		expect(updatedUserInDB.username).toEqual(validUpdateBody.username);
+	});
+	it('returns 403 forbidden when i pass an invalid token', async () => {
+		const response = await putUser(5, null, { token: 'anywrongtoken' });
+		expect(response.status).toBe(403);
 	});
 });

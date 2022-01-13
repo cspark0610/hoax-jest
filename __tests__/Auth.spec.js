@@ -36,7 +36,7 @@ describe('authentication', () => {
 		expect(response.status).toBe(200);
 	});
 
-	it('returns only user id and username when login is successful', async () => {
+	it('returns only user id and username and token when login is successful', async () => {
 		// primer agrego un usuario a la db
 		const user = await addUser();
 		// despues hago un post simulando el login, pasando sus credenciales
@@ -45,7 +45,7 @@ describe('authentication', () => {
 		// response.body es el objeto que se devuelve en el AuthController desde res.send()
 		expect(response.body.id).toBe(user.id);
 		expect(response.body.username).toBe(user.username);
-		expect(Object.keys(response.body)).toEqual(['id', 'username']);
+		expect(Object.keys(response.body)).toEqual(['id', 'username', 'token']);
 	});
 	//implemantation of authentication fail scenario test
 	it('returns 401 unauthorized when user credentials are incorrect', async () => {
@@ -78,5 +78,12 @@ describe('authentication', () => {
 	it('returns 401 when email format its empty', async () => {
 		const response = await postAuthentication({ password: 'P4ssword' });
 		expect(response.status).toBe(401);
+	});
+	// JWT token test
+	it('returns JWT token in response body when credentials are correct', async () => {
+		await addUser();
+		const response = await postAuthentication({ email: 'user1@mail.com', password: 'P4ssword' });
+		// i m going to attach in body a new field called "token" with stores JWT token
+		expect(response.body.token).not.toBeUndefined();
 	});
 });

@@ -5,7 +5,7 @@
 	"main": "app.js",
 	"scripts": {
 		"start": "cross-env NODE_ENV=development nodemon app.js",
-		"jest": "cross-env NODE_ENV=test jest --watch",
+		"jest": "cross-env NODE_ENV=test jest --watch --verbose",
 		"lint": "eslint . --fix",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
@@ -19,6 +19,7 @@
 		"i18next": "^21.6.5",
 		"i18next-fs-backend": "^1.1.4",
 		"i18next-http-middleware": "^3.1.5",
+		"jsonwebtoken": "^8.5.1",
 		"nodemailer": "^6.7.2",
 		"sequelize": "^6.12.0",
 		"sqlite3": "^5.0.2"

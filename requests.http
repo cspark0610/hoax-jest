@@ -6,3 +6,8 @@ Content-Type: application/json
 	"email": "user1@mail.com",
 	"password": "P4ssword"
 }
+
+###
+
+GET http://localhost:3000/api/1.0/users
+Content-Type: application/json
