@@ -186,7 +186,7 @@ describe('token expiration', () => {
 		await putUser(savedUser.id, validUpdateBody, { token: token });
 
 		const rightBeforeSendingRequest = new Date();
-		await (await request(app).get('/api/1.0/users/me')).set('Authorization', `Bearer ${token}`);
+		await request(app).get('/api/1.0/users/me').set('Authorization', `Bearer ${token}`);
 		const tokenInDB = await Token.findOne({ where: { token: token } });
 		// comparo la fecha de ultimo uso del token con el momento actual en que se manda la request
 		expect(tokenInDB.lastUsedAt.getTime()).toBeGreaterThan(rightBeforeSendingRequest.getTime());
