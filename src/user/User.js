@@ -38,7 +38,7 @@ User.init(
 );
 
 // relation one to many
-User.hasMany(Token, { onDelete: 'CASCADE', foreignKey: 'userId' });
+User.hasMany(Token, { onDelete: 'cascade', foreignKey: 'userId' });
 
 //export User model
 module.exports = User;
