@@ -127,7 +127,7 @@ router.post('/api/1.0/users/token/:token', async (req, res, next) => {
 });
 
 // router for UserListing.spec
-router.get('/api/1.0/users', pagination, tokenAuthentication, async (req, res, next) => {
+router.get('/api/1.0/users', pagination, async (req, res, next) => {
 	const authenticatedUser = req.authenticatedUser;
 	const { size, page } = req.pagination;
 	const users = await UserService.getUsers(page, size, authenticatedUser);
@@ -143,7 +143,7 @@ router.get('/api/1.0/users/:id', async (req, res, next) => {
 	}
 });
 
-router.put('/api/1.0/users/:id', tokenAuthentication, async (req, res, next) => {
+router.put('/api/1.0/users/:id', async (req, res, next) => {
 	const authenticatedUser = req.authenticatedUser;
 
 	if (!authenticatedUser || authenticatedUser.id != req.params.id) {
@@ -153,7 +153,7 @@ router.put('/api/1.0/users/:id', tokenAuthentication, async (req, res, next) => 
 	return res.status(200).send();
 });
 
-router.delete('/api/1.0/users/:id', tokenAuthentication, async (req, res, next) => {
+router.delete('/api/1.0/users/:id', async (req, res, next) => {
 	const authenticatedUser = req.authenticatedUser;
 	if (!authenticatedUser || authenticatedUser.id != req.params.id) {
 		return next(new ForbiddenException('unauthorized_user_delete'));

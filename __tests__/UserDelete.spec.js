@@ -89,9 +89,7 @@ describe('user delete', () => {
 
 	it('returns 200 ok when valid delete request is sent from a correct authenticated user', async () => {
 		const savedUser = await addUser();
-		console.log('savedUser id', savedUser);
 		const token = await auth({ auth: credentials });
-		console.log('token', token);
 		const response = await deleteUser(savedUser.id, { token: token });
 		expect(response.status).toBe(200);
 	});

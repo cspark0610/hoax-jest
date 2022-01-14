@@ -41,7 +41,7 @@ beforeAll(async () => {
 });
 //before the execution of EACH test iam going to use beforeEach() function
 //destroy User Table before each test
-beforeEach(() => {
+beforeEach(async () => {
 	simulateSMTPFailure = false;
 	await User.destroy({ truncate: { cascade: true } });
 });

@@ -16,8 +16,17 @@ Token.init(
 		// userId: {
 		// 	type: Sequelize.INTEGER,
 		// },
+		lastUsedAt: {
+			//campo custom para trabajar con fechas de expiracion de token
+			type: Sequelize.DATE,
+		},
 	},
-	{ sequelize, modelName: 'token' }
+	{
+		sequelize,
+		modelName: 'token',
+		// para deshabilitar la creacion automatica de Sequalize de las columnas creeatedAt y updatedAt
+		timestamps: false,
+	}
 );
 
 //always export class
