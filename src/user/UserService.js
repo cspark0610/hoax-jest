@@ -1,17 +1,12 @@
 const User = require('./User');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const EmailService = require('../email/EmailService');
 const sequelize = require('../config/database');
 const EmailException = require('../email/EmailException');
 const InvalidTokenException = require('./InvalidTokenException');
 const UserNotFoundException = require('./UserNotFoundException');
 const { Op } = require('sequelize');
-
-//separate function to generate activation token which is a random string for user
-const generateActivationToken = (length) => {
-	return crypto.randomBytes(length).toString('hex').substring(0, length);
-};
+const { randomString } = require('../shared/tokenGenerator');
 
 const save = async (body) => {
 	// es necesaria la desestructuracion aca si es que voy a pasar un campo inactive dentro de req.body
@@ -20,7 +15,7 @@ const save = async (body) => {
 	// hashes the password incoming from req.body
 	const hashedPassword = await bcrypt.hash(password, 10);
 	// 3rd alternative
-	const user = { username, email, password: hashedPassword, activationToken: generateActivationToken(16) };
+	const user = { username, email, password: hashedPassword, activationToken: randomString(16) };
 
 	const transaction = await sequelize.transaction();
 	//crear un User con la transaction correspondiente para manejar el catch
@@ -103,7 +98,11 @@ const updateUser = async (id, body) => {
 	await user.save();
 };
 
-module.exports = { save, findByEmail, activate, getUsers, getUserById, updateUser };
+const deleteUser = async (id) => {
+	await User.destroy({ where: { id: id } });
+};
+
+module.exports = { save, findByEmail, activate, getUsers, getUserById, updateUser, deleteUser };
 
 // 1st alternative literal object with all the fields
 // const user = {

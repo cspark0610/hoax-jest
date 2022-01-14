@@ -14,5 +14,6 @@
 	"validation_failure": "validacion fallida",
 	"user_not_found": "no se encontró el usuario",
 	"authentication_failure": "credenciales incorrectas",
-	"unauthorized_user_update": "no estas autorizado a actualizar el usuario sin autenticarte"
+	"unauthorized_user_update": "no estas autorizado a actualizar el usuario sin autenticarte",
+	"unauthorized_user_delete": "no estas autorizado a borrar al usuario sin autenticarte"
 }

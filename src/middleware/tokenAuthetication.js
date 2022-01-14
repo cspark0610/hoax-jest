@@ -1,8 +1,6 @@
-const bcrypt = require('bcrypt');
-const UserService = require('../user/UserService');
 const TokenService = require('../auth/TokenService');
 
-const jwtAuthentication = async (req, res, next) => {
+const tokenAuthentication = async (req, res, next) => {
 	const authorizationHeader = req.headers.authorization;
 	if (authorizationHeader) {
 		// 'Bearer oiaunvduvnuvd'
@@ -16,4 +14,4 @@ const jwtAuthentication = async (req, res, next) => {
 	next();
 };
 
-module.exports = jwtAuthentication;
+module.exports = tokenAuthentication;

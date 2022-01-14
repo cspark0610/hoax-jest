@@ -1,6 +1,7 @@
 const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/user/User');
+const Token = require('../src/auth/Token');
 const sequelize = require('../src/config/database');
 const bcrypt = require('bcrypt');
 // import json from locales
@@ -15,6 +16,37 @@ beforeAll(async () => {
 beforeEach(async () => {
 	await User.destroy({ truncate: true });
 });
+
+const activeUser = {
+	username: 'user1',
+	email: 'user1@mail.com',
+	password: 'P4ssword',
+	inactive: false,
+};
+const addUser = async (user = { ...activeUser }) => {
+	const hash = await bcrypt.hash(user.password, 10);
+	user.password = hash;
+	return await User.create(user);
+};
+
+const credentials = { email: 'user1@mail.com', password: 'P4ssword' };
+
+const postAuthentication = (credentials, options = {}) => {
+	let agent = request(app).post('/api/1.0/auth');
+	if (options.language) {
+		agent.set('Accept-Language', options.language);
+	}
+	return agent.send(credentials);
+};
+
+const postLogout = async (options = {}) => {
+	const agent = request(app).post('/api/1.0/logout').send();
+	if (options.token) {
+		agent.set('Authorization', `Bearer ${options.token}`);
+	}
+	return agent.send();
+};
+
 describe('authentication', () => {
 	const validUser = { username: 'user1', email: 'user1@mail.com', password: 'P4ssword', inactive: false };
 
@@ -85,5 +117,20 @@ describe('authentication', () => {
 		const response = await postAuthentication({ email: 'user1@mail.com', password: 'P4ssword' });
 		// i m going to attach in body a new field called "token" with stores JWT token
 		expect(response.body.token).not.toBeUndefined();
+	});
+});
+
+describe('token logout', () => {
+	it('returns 200 ok when unauthorized request is sent for logout', async () => {
+		const response = await postLogout();
+		expect(response.status).toBe(200);
+	});
+	it('removes corresponding token from databse', async () => {
+		await addUser();
+		const response = await postAuthentication(credentials);
+		const token = response.body.token;
+		await postLogout({ token: token });
+		const storedToken = await Token.findOne({ where: { token: token } });
+		expect(storedToken).toBeNull();
 	});
 });
