@@ -12,9 +12,10 @@ Token.init(
 		token: {
 			type: Sequelize.STRING,
 		},
-		userId: {
-			type: Sequelize.INTEGER,
-		},
+		// remove this field because i established a relation with userId as foreignKey
+		// userId: {
+		// 	type: Sequelize.INTEGER,
+		// },
 	},
 	{ sequelize, modelName: 'token' }
 );

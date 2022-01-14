@@ -43,7 +43,7 @@ beforeAll(async () => {
 //destroy User Table before each test
 beforeEach(() => {
 	simulateSMTPFailure = false;
-	return User.destroy({ truncate: true });
+	await User.destroy({ truncate: { cascade: true } });
 });
 
 //close SMTP server after each test

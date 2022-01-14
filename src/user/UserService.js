@@ -7,6 +7,7 @@ const InvalidTokenException = require('./InvalidTokenException');
 const UserNotFoundException = require('./UserNotFoundException');
 const { Op } = require('sequelize');
 const { randomString } = require('../shared/tokenGenerator');
+//const TokenService = require('../auth/TokenService');
 
 const save = async (body) => {
 	// es necesaria la desestructuracion aca si es que voy a pasar un campo inactive dentro de req.body
@@ -100,6 +101,7 @@ const updateUser = async (id, body) => {
 
 const deleteUser = async (id) => {
 	await User.destroy({ where: { id: id } });
+	//await TokenService.deleteTokensOfUser(id);
 };
 
 module.exports = { save, findByEmail, activate, getUsers, getUserById, updateUser, deleteUser };

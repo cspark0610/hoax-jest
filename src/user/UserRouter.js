@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const UserService = require('./UserService');
+const TokenService = require('../auth/TokenService');
 const { check, validationResult } = require('express-validator');
 const pagination = require('../middleware/pagination');
 const ForbiddenException = require('../error/ForbiddenException');
@@ -158,6 +159,12 @@ router.delete('/api/1.0/users/:id', tokenAuthentication, async (req, res, next) 
 		return next(new ForbiddenException('unauthorized_user_delete'));
 	}
 	await UserService.deleteUser(req.params.id);
+	// hay que eliminar tambien el token del usuario
+	// bad logic implementation because there is two different services interactions
+	// handle deleating tokens in UserService
+	// const { authorization } = req.headers;
+	// const token = authorization.split(' ')[1];
+	// await TokenService.deleteToken(token);
 	return res.status(200).send();
 });
 

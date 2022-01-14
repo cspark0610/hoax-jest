@@ -8,7 +8,7 @@ beforeAll(async () => {
 	await sequelize.sync();
 });
 beforeEach(async () => {
-	await User.destroy({ truncate: true });
+	await User.destroy({ truncate: { cascade: true } });
 });
 
 const auth = async (options = {}) => {

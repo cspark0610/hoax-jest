@@ -5,6 +5,8 @@
 const Sequelize = require('sequelize');
 // own instance of sequelize
 const sequelize = require('../config/database');
+// import Token Models to establish relations
+const Token = require('../auth/Token');
 
 class User extends Sequelize.Model {}
 
@@ -34,6 +36,9 @@ User.init(
 	},
 	{ sequelize, modelName: 'user' }
 );
+
+// relation one to many
+User.hasMany(Token, { onDelete: 'CASCADE', foreignKey: 'userId' });
 
 //export User model
 module.exports = User;
