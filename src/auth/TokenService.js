@@ -17,7 +17,7 @@ const createToken = async (user) => {
 };
 
 const verifyToken = async (token) => {
-	const exactOneWeekAgo = new Date(Date.now - 7 * 24 * 60 * 60 * 1000);
+	const exactOneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
 	const tokenInDb = await Token.findOne({
 		where: {
@@ -32,9 +32,7 @@ const verifyToken = async (token) => {
 	await tokenInDb.save();
 
 	const userId = tokenInDb.userId;
-	return {
-		id: userId,
-	};
+	return { id: userId };
 	//return jwt.verify(token, 'secret_key');
 };
 

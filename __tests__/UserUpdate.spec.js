@@ -26,7 +26,7 @@ const putUser = async (id = 5, body = null, options = {}) => {
 		// // o usar la funcion de supertest .auth
 		// // agent.auth(email, password);
 		let response = await agent.post('/api/1.0/auth').send(options.auth);
-		token = response.body.token ? response.body.token : '';
+		token = response.body.token;
 	}
 	agent = request(app).put(`/api/1.0/users/${id}`);
 

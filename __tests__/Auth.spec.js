@@ -151,7 +151,7 @@ describe('token expiration', () => {
 		//necesito crear un token con una fecha de uso de una semana anterior a la fecha actual
 		const token = 'test-token';
 		//always in milliseconds format menos 2 milisegundos
-		const oneWeekAgo = new Date(Date.now - 7 * 24 * 60 * 60 * 1000 - 2);
+		const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000 - 2);
 		await Token.create({ token: token, userId: savedUser.id, lastUsedAt: oneWeekAgo });
 
 		const validUpdateBody = { username: 'user1-updated' };
@@ -164,29 +164,32 @@ describe('token expiration', () => {
 		//necesito crear un token con una fecha de uso de una semana anterior a la fecha actual
 		const token = 'test-token';
 
-		const fourDaysAgo = new Date(Date.now - 4 * 24 * 60 * 60 * 1000);
+		const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
 		await Token.create({ token: token, userId: savedUser.id, lastUsedAt: fourDaysAgo });
 
 		const validUpdateBody = { username: 'user1-updated' };
 		await putUser(savedUser.id, validUpdateBody, { token: token });
 
-		const rightBeforeSendingRequest = new Date();
+		const now = new Date();
 		const tokenInDB = await Token.findOne({ where: { token: token } });
+
+		//console.log('tokenInDB.lastUsedAt', tokenInDB.lastUsedAt.getTime());
+
 		// comparo la fecha de ultimo uso del token con el momento actual en que se manda la request
-		expect(tokenInDB.lastUsedAt.getTime()).toBeGreaterThan(rightBeforeSendingRequest.getTime());
+		expect(tokenInDB.lastUsedAt.getTime()).toBeLessThan(now.getTime());
 	});
 
 	it('refreshes lastUsedAt when unexpired token is used for unauthenticated endpoint', async () => {
 		const savedUser = await addUser();
 		const token = 'test-token';
-		const fourDaysAgo = new Date(Date.now - 4 * 24 * 60 * 60 * 1000);
+		const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
 		await Token.create({ token: token, userId: savedUser.id, lastUsedAt: fourDaysAgo });
 
 		const validUpdateBody = { username: 'user1-updated' };
 		await putUser(savedUser.id, validUpdateBody, { token: token });
 
 		const rightBeforeSendingRequest = new Date();
-		await request(app).get('/api/1.0/users/me').set('Authorization', `Bearer ${token}`);
+		await request(app).get('/api/1.0/users/6').set('Authorization', `Bearer ${token}`);
 		const tokenInDB = await Token.findOne({ where: { token: token } });
 		// comparo la fecha de ultimo uso del token con el momento actual en que se manda la request
 		expect(tokenInDB.lastUsedAt.getTime()).toBeGreaterThan(rightBeforeSendingRequest.getTime());
