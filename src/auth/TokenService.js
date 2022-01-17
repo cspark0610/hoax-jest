@@ -40,6 +40,19 @@ const deleteToken = async (token) => {
 	await Token.destroy({ where: { token: token } });
 };
 
+const scheduleClearExpiredTokens = () => {
+	// se debe implementar una funcionalidad que periodicamente cada 1 hora que borre los tokens que han expirado
+	// de la base de datos se usa setInterval()
+
+	setInterval(async () => {
+		const exactOneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+		await Token.destroy({
+			// if i want older than one week lastUsedAt value has to be less than exactOneWeekAgo
+			where: { lastUsedAt: { [Op.lt]: exactOneWeekAgo } },
+		});
+	}, 60 * 60 * 1000);
+};
+
 // const deleteTokensOfUser = async (userId) => {
 // 	await Token.destroy({ where: { userId: userId } });
 // };
@@ -48,5 +61,6 @@ module.exports = {
 	createToken,
 	verifyToken,
 	deleteToken,
+	scheduleClearExpiredTokens,
 	//deleteTokensOfUser,
 };

@@ -132,7 +132,7 @@ describe('listing users', () => {
 	});
 	it('returns user page withouot logged in user when request has valid authorization', async () => {
 		await addUsers(11);
-		//get token with auth function
+		//get token with auth function which is async
 		const token = await auth({
 			auth: {
 				email: 'user1@mail.com',

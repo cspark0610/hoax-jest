@@ -137,9 +137,7 @@ describe('token logout', () => {
 
 describe('token expiration', () => {
 	const putUser = async (id = 5, body = null, options = {}) => {
-		// refactor to receive jwt token
-		let agent = request(app);
-		agent = request(app).put(`/api/1.0/users/${id}`);
+		let agent = request(app).put(`/api/1.0/users/${id}`);
 		if (options.token) {
 			agent.set('Authorization', `Bearer ${options.token}`);
 		}

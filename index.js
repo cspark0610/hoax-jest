@@ -2,6 +2,7 @@ const app = require('./src/app');
 const sequelize = require('./src/config/database');
 const bcrypt = require('bcrypt');
 const User = require('./src/user/User');
+const TokenService = require('./src/auth/TokenService');
 
 const addUsers = async (activeUserCount, inactiveUserCount = 0) => {
 	const hash = await bcrypt.hash('P4ssword', 10);
@@ -20,6 +21,8 @@ sequelize.sync({ force: true }).then(async () => {
 	await addUsers(26);
 });
 //console.log('env' + ' ' + process.env.NODE_ENV);
+
+TokenService.scheduleClearExpiredTokens();
 
 app.listen(3000, () => {
 	console.log('server is running on port 3000');
