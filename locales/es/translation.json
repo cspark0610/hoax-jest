@@ -15,5 +15,7 @@
 	"user_not_found": "no se encontró el usuario",
 	"authentication_failure": "credenciales incorrectas",
 	"unauthorized_user_update": "no estas autorizado a actualizar el usuario sin autenticarte",
-	"unauthorized_user_delete": "no estas autorizado a borrar al usuario sin autenticarte"
+	"unauthorized_user_delete": "no estas autorizado a borrar al usuario sin autenticarte",
+	"email_not_inuse": "email no existente",
+	"password_reset_request_success": "chequea tu email para resetear tu password"
 }

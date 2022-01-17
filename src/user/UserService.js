@@ -7,6 +7,7 @@ const InvalidTokenException = require('./InvalidTokenException');
 const UserNotFoundException = require('./UserNotFoundException');
 const { Op } = require('sequelize');
 const { randomString } = require('../shared/tokenGenerator');
+const NotFoundException = require('../error/NotFoundException');
 //const TokenService = require('../auth/TokenService');
 
 const save = async (body) => {
@@ -104,7 +105,16 @@ const deleteUser = async (id) => {
 	//await TokenService.deleteTokensOfUser(id);
 };
 
-module.exports = { save, findByEmail, activate, getUsers, getUserById, updateUser, deleteUser };
+const passwordResetRequest = async (email) => {
+	const user = await findByEmail(email);
+	if (!user) {
+		throw new NotFoundException('email_not_inuse');
+	}
+	user.passwordResetToken = randomString(16);
+	await user.save();
+};
+
+module.exports = { save, findByEmail, activate, getUsers, getUserById, updateUser, deleteUser, passwordResetRequest };
 
 // 1st alternative literal object with all the fields
 // const user = {

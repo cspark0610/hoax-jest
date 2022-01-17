@@ -5,6 +5,8 @@ const TokenService = require('../auth/TokenService');
 const { check, validationResult } = require('express-validator');
 const pagination = require('../middleware/pagination');
 const ForbiddenException = require('../error/ForbiddenException');
+
+const ValidationException = require('../error/ValidationException');
 const basicAuthentication = require('../middleware/basicAuthentication');
 const tokenAuthentication = require('../middleware/tokenAuthetication');
 
@@ -166,5 +168,24 @@ router.delete('/api/1.0/users/:id', async (req, res, next) => {
 	// await TokenService.deleteToken(token);
 	return res.status(200).send();
 });
+
+//route to handle password reset request
+router.post(
+	'/api/1.0/password-reset',
+	check('email').isEmail().withMessage('email_invalid'),
+	async (req, res, next) => {
+		const errors = validationResult(req);
+		//console.log('errors', errors.array());
+		if (!errors.isEmpty()) {
+			next(new ValidationException(errors.array()));
+		}
+		try {
+			await UserService.passwordResetRequest(req.body.email);
+			return res.status(200).send({ message: req.t('password_reset_request_success') });
+		} catch (error) {
+			next(error);
+		}
+	}
+);
 
 module.exports = router;

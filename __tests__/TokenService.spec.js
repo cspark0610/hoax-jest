@@ -1,5 +1,3 @@
-const request = require('supertest');
-const app = require('../src/app');
 const User = require('../src/user/User');
 const Token = require('../src/auth/Token');
 const sequelize = require('../src/config/database');
