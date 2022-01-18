@@ -20,4 +20,25 @@ const sendEmailAccountActivation = async (email, token) => {
 		console.log('url', nodemailer.getTestMessageUrl(info));
 	}
 };
-module.exports = { sendEmailAccountActivation };
+
+const sendPasswordResetEmail = async (email, token) => {
+	const info = await transporter.sendMail({
+		//mail options
+		from: 'my app <info@myapp.com>',
+		to: email,
+		subject: 'Password reset',
+		html: `
+			<div>
+				<b>Please click below to reset your password</b>
+			</div>
+			<div>
+				<a href="http://localhost:3000/#/password-reset?reset=${token}">Reset</a>
+			</div>
+		`,
+	});
+	if (process.env.NODE_ENV === 'development') {
+		console.log('url', nodemailer.getTestMessageUrl(info));
+	}
+};
+
+module.exports = { sendEmailAccountActivation, sendPasswordResetEmail };

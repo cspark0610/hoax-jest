@@ -17,5 +17,6 @@
 	"unauthorized_user_update": "you are not authorized to update user without authenthication",
 	"unauthorized_user_delete": "you are not authorized to delete user without authenthication",
 	"email_not_inuse": "email is not in use",
-	"password_reset_request_success": "check your email for password reset instructions"
+	"password_reset_request_success": "check your email for password reset instructions",
+	"unauthorized_password_reset": "you are not authorized to update your password"
 }

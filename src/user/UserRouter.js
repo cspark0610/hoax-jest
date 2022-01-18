@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const UserService = require('./UserService');
-const TokenService = require('../auth/TokenService');
+
 const { check, validationResult } = require('express-validator');
 const pagination = require('../middleware/pagination');
 const ForbiddenException = require('../error/ForbiddenException');
@@ -19,13 +19,6 @@ const validateUsername = (req, res, next) => {
 		req.validationErrors = {
 			username: 'Username cannot be null',
 		};
-		//have to put return always in order to avoid null to be written in db!
-		// return res.status(400).send({
-		// 	validationErrors: {
-		// 		username: 'Username cannot be null',
-		// 		email: 'Email cannot be null',
-		// 	},
-		// });
 	}
 	next();
 };
@@ -37,12 +30,6 @@ const validateEmail = (req, res, next) => {
 			...req.validationErrors,
 			email: 'Email cannot be null',
 		};
-		//have to put return always in order to avoid null to be written in db!
-		// return res.status(400).send({
-		// 	validationErrors: {
-		// 		email: 'Email cannot be null',
-		// 	},
-		// });
 	}
 	next();
 };
@@ -88,29 +75,12 @@ router.post(
 			return res.status(400).send({ validationErrors });
 			//return next(new ValidationException(errors.array()));
 		}
-
-		//manual validation
-		// if (req.validationErrors) {
-		// 	const response = {
-		// 		validationErrors: { ...req.validationErrors },
-		// 	};
-		// 	// response {
-		// 	// 	validationErrors: {
-		// 	// 		username: 'Username cannot be null',
-		// 	// 		email: 'Email cannot be null',
-		// 	// 	}
-		// 	// }
-		// 	return res.status(400).send(response);
-		// }
 		try {
 			await UserService.save(req.body);
 			return res.status(200).send({
 				message: req.t('user_create_success'),
 			});
 		} catch (error) {
-			// return res.status(502).send({
-			// 	message: req.t(error.message),
-			// });
 			next(error);
 		}
 	}
@@ -119,7 +89,6 @@ router.post(
 //additional route to handle token activation
 router.post('/api/1.0/users/token/:token', async (req, res, next) => {
 	const token = req.params.token;
-	//console.log('token', token);
 	try {
 		await UserService.activate(token);
 		return res.send({ message: req.t('account_activation_success') });
@@ -169,23 +138,53 @@ router.delete('/api/1.0/users/:id', async (req, res, next) => {
 	return res.status(200).send();
 });
 
-//route to handle password reset request
-router.post(
-	'/api/1.0/password-reset',
-	check('email').isEmail().withMessage('email_invalid'),
+//route to handle password reset request, para la creacion de un passwordResetToken
+router.post('/api/1.0/user/password', check('email').isEmail().withMessage('email_invalid'), async (req, res, next) => {
+	const errors = validationResult(req);
+	//console.log('errors', errors.array());
+	if (!errors.isEmpty()) {
+		next(new ValidationException(errors.array()));
+	}
+	try {
+		await UserService.passwordResetRequest(req.body.email);
+		return res.status(200).send({ message: req.t('password_reset_request_success') });
+	} catch (error) {
+		next(error);
+	}
+});
+
+const passwordResetTokenValidator = async (req, res, next) => {
+	// se debe chequear en DB si el passwordResetToken existe en algun user
+	const user = await UserService.findByPasswordResetToken(req.body.passwordResetToken);
+	if (!user) {
+		return next(new ForbiddenException('unauthorized_password_reset'));
+	}
+	next();
+};
+
+//route to handle password update request
+router.put(
+	'/api/1.0/user/password',
+	passwordResetTokenValidator,
+	check('password')
+		.notEmpty()
+		.withMessage('password_null')
+		.bail()
+		.isLength({ min: 6 })
+		.withMessage('password_size')
+		.bail()
+		.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)
+		.withMessage('password_pattern'),
 	async (req, res, next) => {
 		const errors = validationResult(req);
-		//console.log('errors', errors.array());
 		if (!errors.isEmpty()) {
-			next(new ValidationException(errors.array()));
+			const validationErrors = {};
+			console.log('errors', errors.array());
+			errors.array().forEach((error) => (validationErrors[error.param] = req.t(error.msg)));
+			return res.status(400).send({ validationErrors });
 		}
-		try {
-			await UserService.passwordResetRequest(req.body.email);
-			return res.status(200).send({ message: req.t('password_reset_request_success') });
-		} catch (error) {
-			next(error);
-		}
+		await UserService.updatePassword(req.body);
+		res.send();
 	}
 );
-
 module.exports = router;

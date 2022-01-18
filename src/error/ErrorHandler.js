@@ -6,5 +6,5 @@ module.exports = (err, req, res, next) => {
 	// 	validationErrors = {};
 	// 	errors.forEach((error) => (validationErrors[error.param] = req.t(error.msg)));
 	// }
-	res.status(status || 500).send({ message: req.t(message) });
+	res.status(status).send({ message: req.t(message) });
 };

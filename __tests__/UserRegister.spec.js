@@ -12,7 +12,9 @@ const { SMTPServer } = require('smtp-server');
 // import json from locales
 const en = require('../locales/en/translation.json');
 const es = require('../locales/es/translation.json');
+const config = require('config');
 
+//simulute smtp server
 let lastMail;
 let server;
 let simulateSMTPFailure = false;
@@ -35,7 +37,7 @@ beforeAll(async () => {
 			});
 		},
 	});
-	await server.listen(5857, 'localhost');
+	await server.listen(config.mail.port, 'localhost');
 	await sequelize.sync();
 	jest.setTimeout(20000);
 });

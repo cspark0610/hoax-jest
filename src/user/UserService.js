@@ -8,7 +8,7 @@ const UserNotFoundException = require('./UserNotFoundException');
 const { Op } = require('sequelize');
 const { randomString } = require('../shared/tokenGenerator');
 const NotFoundException = require('../error/NotFoundException');
-//const TokenService = require('../auth/TokenService');
+const TokenService = require('../auth/TokenService');
 
 const save = async (body) => {
 	// es necesaria la desestructuracion aca si es que voy a pasar un campo inactive dentro de req.body
@@ -112,9 +112,46 @@ const passwordResetRequest = async (email) => {
 	}
 	user.passwordResetToken = randomString(16);
 	await user.save();
+	try {
+		// aca tb debo llamar al servicio de email para enviar el email con el passwordResetToken
+		await EmailService.sendPasswordResetEmail(email, user.passwordResetToken);
+	} catch (error) {
+		// Email exception tiene status code 502
+		throw new EmailException();
+	}
 };
 
-module.exports = { save, findByEmail, activate, getUsers, getUserById, updateUser, deleteUser, passwordResetRequest };
+const updatePassword = async (updateRequest) => {
+	const user = await findByPasswordResetToken(updateRequest.passwordResetToken);
+	const hash = await bcrypt.hash(updateRequest.password, 10);
+	user.password = hash;
+	// se debe nullear el token de reseteo de password una vez que se actualiza la password
+	user.passwordResetToken = null;
+	// final test
+	user.inactive = false;
+	user.activationToken = null;
+	//clear all tokens
+	await TokenService.clearTokens(user.id);
+
+	await user.save();
+};
+
+const findByPasswordResetToken = (token) => {
+	return User.findOne({ where: { passwordResetToken: token } });
+};
+
+module.exports = {
+	save,
+	findByEmail,
+	activate,
+	getUsers,
+	getUserById,
+	updateUser,
+	deleteUser,
+	passwordResetRequest,
+	updatePassword,
+	findByPasswordResetToken,
+};
 
 // 1st alternative literal object with all the fields
 // const user = {
